@@ -3,25 +3,25 @@
 import { useState, useEffect } from "react";
 import { FolderGit2 } from "lucide-react";
 
-interface RepoProgress {
+interface RepoMomentum {
   id: string;
   name: string;
   fullName: string;
   url: string;
   language: string | null;
-  progress: number;
+  momentumScore: number;
   lastCommitDate: string | null;
   totalCommits: number;
   lastSyncedAt: string | null;
 }
 
-function getProgressColor(score: number): string {
+function getMomentumColor(score: number): string {
   if (score > 70) return "#4ade80";
   if (score >= 40) return "#fbbf24";
   return "#f87171";
 }
 
-function getProgressBg(score: number): string {
+function getMomentumBg(score: number): string {
   if (score > 70) return "#052e16";
   if (score >= 40) return "#422006";
   return "#450a0a";
@@ -41,12 +41,17 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-export default function ProjectsProgress() {
-  const [repos, setRepos] = useState<RepoProgress[]>([]);
+interface ProjectsMomentumProps {
+  refreshKey: number;
+}
+
+export default function ProjectsMomentum({ refreshKey }: ProjectsMomentumProps) {
+  const [repos, setRepos] = useState<RepoMomentum[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProgress = async () => {
+    const fetchMomentum = async () => {
+      setLoading(true);
       try {
         const res = await fetch("/api/repos/progress");
         if (res.ok) {
@@ -54,13 +59,13 @@ export default function ProjectsProgress() {
           setRepos(data.repos);
         }
       } catch (err) {
-        console.error("Failed to fetch progress:", err);
+        console.error("Failed to fetch project momentum:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchProgress();
-  }, []);
+    fetchMomentum();
+  }, [refreshKey]);
 
   if (loading) {
     return (
@@ -68,7 +73,7 @@ export default function ProjectsProgress() {
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
           <FolderGit2 size={18} color="#888" />
           <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0, color: "#aaa" }}>
-            Projects
+            Project Momentum
           </h2>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -102,7 +107,7 @@ export default function ProjectsProgress() {
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
           <FolderGit2 size={18} color="#888" />
           <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0, color: "#aaa" }}>
-            Projects
+            Project Momentum
           </h2>
         </div>
         <div
@@ -125,15 +130,19 @@ export default function ProjectsProgress() {
       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
         <FolderGit2 size={18} color="#888" />
         <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0, color: "#aaa" }}>
-          Projects ({repos.length})
+          Project Momentum ({repos.length})
         </h2>
       </div>
+
+      <p style={{ color: "#666", fontSize: "0.8rem", margin: "-8px 0 16px" }}>
+        Based on recent activity, commit frequency, and commit patterns.
+      </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {repos.map((repo) => {
           const hasCommits = repo.totalCommits > 0;
-          const color = getProgressColor(repo.progress);
-          const bgColor = getProgressBg(repo.progress);
+          const color = getMomentumColor(repo.momentumScore);
+          const bgColor = getMomentumBg(repo.momentumScore);
 
           return (
             <div
@@ -182,14 +191,14 @@ export default function ProjectsProgress() {
                 )}
               </div>
 
-              {/* If no commits: show message instead of progress bar */}
+              {/* If no commits: show a message instead of a momentum bar */}
               {!hasCommits && (
                 <p style={{ color: "#555", fontSize: "0.8rem", margin: "8px 0 0 0" }}>
                   No commits synced yet — hit Sync Now to load activity
                 </p>
               )}
 
-              {/* Progress bar — only shown when commits exist */}
+              {/* Momentum bar — only shown when commits exist */}
               {hasCommits && (
                 <>
                   <div
@@ -204,7 +213,7 @@ export default function ProjectsProgress() {
                   >
                     <div
                       style={{
-                        width: `${repo.progress}%`,
+                        width: `${repo.momentumScore}%`,
                         height: "100%",
                         background: color,
                         borderRadius: "3px",
@@ -232,7 +241,7 @@ export default function ProjectsProgress() {
                         borderRadius: "4px",
                       }}
                     >
-                      {repo.progress}%
+                      Momentum score: {repo.momentumScore}
                     </span>
                     <span>{plural(repo.totalCommits, "commit")}</span>
                     {repo.lastCommitDate && (

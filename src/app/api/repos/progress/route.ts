@@ -4,12 +4,12 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 /**
- * Calculate a progress score (0-100) for a repo based on:
+ * Calculate a momentum score (0-100) for a repo based on:
  * - Recency (40%): how recently the last commit was made
  * - Frequency (40%): how many commits in the last 30 days
  * - Feature ratio (20%): ratio of feature commits (feat/add) vs fix commits
  */
-function calculateProgress(
+function calculateMomentum(
   commits: { message: string; committedAt: Date | null }[]
 ): number {
   if (commits.length === 0) return 0;
@@ -50,7 +50,7 @@ function calculateProgress(
   // ── Feature Ratio Score (0-100) ──
   // Commits starting with feat/add/feature = building new things
   // Commits starting with fix/bug/hotfix = maintenance
-  // Higher feature ratio = higher perceived forward progress
+  // Higher feature ratio contributes to stronger development momentum
   const featurePattern = /^(feat|add|feature|implement|create|build|init)/i;
   const fixPattern = /^(fix|bug|hotfix|patch|revert)/i;
 
@@ -112,7 +112,7 @@ export async function GET() {
   });
 
   const results = repos.map((repo) => {
-    const progress = calculateProgress(repo.commits);
+    const momentumScore = calculateMomentum(repo.commits);
 
     // Find the most recent commit date
     const lastCommitDate =
@@ -126,15 +126,15 @@ export async function GET() {
       fullName: repo.fullName,
       url: repo.url,
       language: repo.language,
-      progress,
+      momentumScore,
       lastCommitDate,
       totalCommits: repo._count.commits,
       lastSyncedAt: repo.lastSyncedAt,
     };
   });
 
-  // Sort: repos with recent activity and higher progress first
-  results.sort((a, b) => b.progress - a.progress);
+  // Sort: repos with stronger recent momentum first
+  results.sort((a, b) => b.momentumScore - a.momentumScore);
 
   return NextResponse.json({ repos: results });
 }

@@ -21,7 +21,11 @@ function plural(count: number, singular: string, pluralForm?: string): string {
   return count === 1 ? `${count} ${singular}` : `${count} ${pluralForm ?? singular + "s"}`;
 }
 
-export default function SyncButton() {
+interface SyncButtonProps {
+  onSyncComplete: () => void;
+}
+
+export default function SyncButton({ onSyncComplete }: SyncButtonProps) {
   const [syncing, setSyncing] = useState(false);
   const [status, setStatus] = useState<SyncStatus | null>(null);
   const [result, setResult] = useState<SyncResult | null>(null);
@@ -51,10 +55,14 @@ export default function SyncButton() {
 
       if (res.status === 429) {
         setResult({ error: data.error, partial: true, reposSynced: data.reposSynced, commitsSaved: data.commitsSaved });
+        if (data.partial) {
+          onSyncComplete();
+        }
       } else if (!res.ok) {
         setResult({ error: data.error ?? "Sync failed" });
       } else {
         setResult(data);
+        onSyncComplete();
       }
 
       await fetchStatus();

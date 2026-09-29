@@ -3,9 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import Image from "next/image";
 import SignOutButton from "@/components/sign-out-button";
-import SyncButton from "@/components/sync-button";
-import DailySummaryCard from "@/components/daily-summary-card";
-import ProjectsProgress from "@/components/projects-progress";
+import DashboardClient from "@/components/dashboard-client";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -40,14 +38,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Sync controls */}
-      <SyncButton />
-
-      {/* Daily AI Summary */}
-      <DailySummaryCard />
-
-      {/* Project Progress Cards */}
-      <ProjectsProgress />
+      <DashboardClient />
     </main>
   );
 }

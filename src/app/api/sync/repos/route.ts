@@ -14,14 +14,32 @@ export async function POST() {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.accessToken) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: "Unauthorized — no access token" },
+        { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const { accessToken, id: userId, githubId } = session.user;
+    const userId = session.user.id;
+    const account = await prisma.account.findFirst({
+      where: {
+        userId,
+        provider: "github",
+      },
+      select: {
+        access_token: true,
+      },
+    });
+
+    if (!account?.access_token) {
+      return NextResponse.json(
+        { error: "GitHub account is not connected" },
+        { status: 401 }
+      );
+    }
+
+    const accessToken = account.access_token;
 
     // 1. Fetch all repos from GitHub
     const githubRepos = await fetchAllRepos(accessToken);
