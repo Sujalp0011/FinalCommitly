@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FolderGit2 } from "lucide-react";
+import Link from "next/link";
+import { ExternalLink, FolderGit2 } from "lucide-react";
 
 interface RepoMomentum {
   id: string;
@@ -162,10 +163,8 @@ export default function ProjectsMomentum({ refreshKey }: ProjectsMomentumProps) 
                   marginBottom: hasCommits ? "10px" : "0",
                 }}
               >
-                <a
-                  href={repo.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href={`/projects/${repo.id}`}
                   style={{
                     fontWeight: 600,
                     color: "#58a6ff",
@@ -174,21 +173,40 @@ export default function ProjectsMomentum({ refreshKey }: ProjectsMomentumProps) 
                   }}
                 >
                   {repo.fullName}
-                </a>
-                {repo.language && (
-                  <span
+                </Link>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {repo.language ? (
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        fontWeight: 500,
+                        border: "1px solid #333",
+                        borderRadius: "12px",
+                        padding: "2px 10px",
+                        color: "#777",
+                      }}
+                    >
+                      {repo.language}
+                    </span>
+                  ) : null}
+                  <a
+                    href={repo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open ${repo.fullName} on GitHub in a new tab`}
                     style={{
-                      fontSize: "0.7rem",
-                      fontWeight: 500,
-                      border: "1px solid #333",
-                      borderRadius: "12px",
-                      padding: "2px 10px",
-                      color: "#777",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      color: "#666",
+                      fontSize: "0.72rem",
+                      textDecoration: "none",
                     }}
                   >
-                    {repo.language}
-                  </span>
-                )}
+                    GitHub
+                    <ExternalLink size={11} aria-hidden="true" />
+                  </a>
+                </div>
               </div>
 
               {/* If no commits: show a message instead of a momentum bar */}
