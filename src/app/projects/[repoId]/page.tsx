@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ExternalLink, GitCommit } from "lucide-react";
+import ProjectAiInsight from "@/components/project-ai-insight";
 import { authOptions } from "@/lib/auth";
 import {
   COMMIT_CATEGORIES,
@@ -181,6 +182,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         ))}
       </section>
+
+      <ProjectAiInsight repoId={repo.id} />
 
       <section style={{ marginBottom: "30px" }} aria-labelledby="commit-breakdown-title">
         <h2 id="commit-breakdown-title" style={{ margin: "0 0 14px", color: "#C9D1D9", fontSize: "1rem", fontWeight: 600 }}>
