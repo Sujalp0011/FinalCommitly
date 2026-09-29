@@ -178,7 +178,7 @@ export default function DailySummaryCard() {
         <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#666" }}>
           <Inbox size={16} />
           <p style={{ fontSize: "0.875rem", margin: 0 }}>
-            No commits in the last 24 hours. Push some code and sync first.
+            No tracked projects have commits in the last 24 hours.
           </p>
         </div>
       )}

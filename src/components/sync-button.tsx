@@ -5,6 +5,7 @@ import { RefreshCw, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 
 interface SyncStatus {
   repos: number;
+  trackedRepos: number;
   commits: number;
   lastSyncedAt: string | null;
 }
@@ -14,6 +15,7 @@ interface SyncResult {
   error?: string;
   reposSynced?: number;
   commitsSaved?: number;
+  skippedRepoCount?: number;
   partial?: boolean;
 }
 
@@ -21,7 +23,11 @@ function plural(count: number, singular: string, pluralForm?: string): string {
   return count === 1 ? `${count} ${singular}` : `${count} ${pluralForm ?? singular + "s"}`;
 }
 
-export default function SyncButton() {
+interface SyncButtonProps {
+  onSyncComplete: () => void;
+}
+
+export default function SyncButton({ onSyncComplete }: SyncButtonProps) {
   const [syncing, setSyncing] = useState(false);
   const [status, setStatus] = useState<SyncStatus | null>(null);
   const [result, setResult] = useState<SyncResult | null>(null);
@@ -51,10 +57,14 @@ export default function SyncButton() {
 
       if (res.status === 429) {
         setResult({ error: data.error, partial: true, reposSynced: data.reposSynced, commitsSaved: data.commitsSaved });
+        if (data.partial) {
+          onSyncComplete();
+        }
       } else if (!res.ok) {
         setResult({ error: data.error ?? "Sync failed" });
       } else {
         setResult(data);
+        onSyncComplete();
       }
 
       await fetchStatus();
@@ -97,7 +107,7 @@ export default function SyncButton() {
 
         {status && (
           <span style={{ fontSize: "0.8rem", color: "#888" }}>
-            {plural(status.repos, "repo")} · {plural(status.commits, "commit")} synced
+            {status.trackedRepos} of {status.repos} repositories tracked · {plural(status.commits, "commit")} stored for tracked projects
             {status.lastSyncedAt && (
               <> · Last sync: {new Date(status.lastSyncedAt).toLocaleString()}</>
             )}
@@ -134,7 +144,12 @@ export default function SyncButton() {
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <CheckCircle2 size={14} />
-              <span>Synced {plural(result.reposSynced ?? 0, "repo")} — {plural(result.commitsSaved ?? 0, "new commit")} saved</span>
+              <span>
+                Synced {plural(result.reposSynced ?? 0, "tracked repo")} — {plural(result.commitsSaved ?? 0, "new commit")} saved
+                {(result.skippedRepoCount ?? 0) > 0
+                  ? ` · ${plural(result.skippedRepoCount ?? 0, "untracked repo")} skipped`
+                  : ""}
+              </span>
             </div>
           )}
         </div>

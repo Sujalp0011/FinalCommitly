@@ -24,21 +24,6 @@ export const authOptions: NextAuthOptions = {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
-
-        // Read access token from the Account table (stored by Prisma adapter)
-        const account = await prisma.account.findFirst({
-          where: {
-            userId: user.id,
-            provider: "github",
-          },
-          select: {
-            access_token: true,
-            providerAccountId: true,
-          },
-        });
-
-        session.user.accessToken = account?.access_token ?? undefined;
-        session.user.githubId = account?.providerAccountId ?? undefined;
       }
       return session;
     },

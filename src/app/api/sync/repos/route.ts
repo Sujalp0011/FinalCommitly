@@ -7,20 +7,39 @@ import {
   fetchRepoCommits,
   fetchCommitDetail,
   GitHubRateLimitError,
+  GitHubAuthError,
 } from "@/lib/github";
 
 export async function POST() {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.accessToken) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: "Unauthorized — no access token" },
+        { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const { accessToken, id: userId, githubId } = session.user;
+    const userId = session.user.id;
+    const account = await prisma.account.findFirst({
+      where: {
+        userId,
+        provider: "github",
+      },
+      select: {
+        access_token: true,
+      },
+    });
+
+    if (!account?.access_token) {
+      return NextResponse.json(
+        { error: "GitHub account is not connected" },
+        { status: 401 }
+      );
+    }
+
+    const accessToken = account.access_token;
 
     // 1. Fetch all repos from GitHub
     const githubRepos = await fetchAllRepos(accessToken);
@@ -31,6 +50,7 @@ export async function POST() {
 
     let totalReposSynced = 0;
     let totalCommitsSaved = 0;
+    let skippedRepoCount = 0;
     const errors: string[] = [];
 
     // 2. Process each repo
@@ -58,6 +78,11 @@ export async function POST() {
           },
         });
 
+        if (!repo.isTracked) {
+          skippedRepoCount++;
+          continue;
+        }
+
         // 3. Fetch last 30 days of commits
         let commits;
         try {
@@ -68,6 +93,7 @@ export async function POST() {
           );
         } catch (err) {
           if (err instanceof GitHubRateLimitError) throw err;
+          if (err instanceof GitHubAuthError) throw err;
           console.warn(
             `[sync] Failed to fetch commits for ${ghRepo.full_name}:`,
             err
@@ -119,6 +145,7 @@ export async function POST() {
             } catch (detailErr) {
               // If detail fetch fails (e.g. rate limit), save commit without stats
               if (detailErr instanceof GitHubRateLimitError) throw detailErr;
+              if (detailErr instanceof GitHubAuthError) throw detailErr;
               console.warn(
                 `[sync] Could not fetch stats for ${commit.sha.slice(0, 7)}:`,
                 detailErr
@@ -129,10 +156,10 @@ export async function POST() {
               data: {
                 sha: commit.sha,
                 message: commit.commit.message,
-                author: commit.commit.author?.name ?? commit.author?.login ?? null,
+                author: commit.commit.author?.name ?? commit.author?.login ?? githubUsername ?? "unknown",
                 committedAt: commit.commit.author?.date
                   ? new Date(commit.commit.author.date)
-                  : null,
+                  : new Date(),
                 url: commit.html_url,
                 additions,
                 deletions,
@@ -142,6 +169,7 @@ export async function POST() {
             savedCount++;
           } catch (commitErr) {
             if (commitErr instanceof GitHubRateLimitError) throw commitErr;
+            if (commitErr instanceof GitHubAuthError) throw commitErr;
             // Skip duplicate errors silently (race condition on parallel syncs)
             console.warn(
               `[sync] Failed to save commit ${commit.sha.slice(0, 7)}:`,
@@ -169,10 +197,12 @@ export async function POST() {
               partial: true,
               reposSynced: totalReposSynced,
               commitsSaved: totalCommitsSaved,
+              skippedRepoCount,
             },
             { status: 429 }
           );
         }
+        if (repoErr instanceof GitHubAuthError) throw repoErr;
         console.error(`[sync] Error syncing ${ghRepo.full_name}:`, repoErr);
         errors.push(`${ghRepo.full_name}: ${String(repoErr)}`);
       }
@@ -186,9 +216,16 @@ export async function POST() {
       success: true,
       reposSynced: totalReposSynced,
       commitsSaved: totalCommitsSaved,
+      skippedRepoCount,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (err) {
+    if (err instanceof GitHubAuthError) {
+      return NextResponse.json(
+        { error: err.message },
+        { status: 401 }
+      );
+    }
     if (err instanceof GitHubRateLimitError) {
       return NextResponse.json(
         { error: err.message },
@@ -197,7 +234,7 @@ export async function POST() {
     }
     console.error("[sync] Unexpected error:", err);
     return NextResponse.json(
-      { error: "Sync failed unexpectedly" },
+      { error: `Sync failed: ${err instanceof Error ? err.message : "Unknown error"}` },
       { status: 500 }
     );
   }

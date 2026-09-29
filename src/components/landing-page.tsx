@@ -116,7 +116,7 @@ function Hero() {
         }}
       >
         Commitly reads your GitHub commits and gives you a plain-English summary
-        of your progress — across all your side projects, every day.
+        of your activity — across all your side projects, every day.
       </p>
       <button
         id="hero-cta"
@@ -157,7 +157,7 @@ const painPoints = [
   {
     icon: LayoutGrid,
     title: "Multiple repos, zero overview",
-    desc: "Your progress is scattered across 4 different GitHub repos with no unified view.",
+    desc: "Your activity is scattered across 4 different GitHub repos with no unified view.",
   },
   {
     icon: MessageSquareText,
@@ -247,14 +247,14 @@ const features = [
   },
   {
     icon: TrendingUp,
-    title: "Project Progress",
-    desc: "See how each side project is moving — not just commit counts, but actual momentum indicators.",
+    title: "Project Momentum",
+    desc: "See each side project's momentum based on recent activity, commit frequency, and commit patterns.",
     gradient: `linear-gradient(135deg, #1a2e1a, #4ade8022)`,
   },
   {
     icon: Search,
     title: "Commit Pattern Insights",
-    desc: "Spot patterns in how you work. Are you building or just fixing? Moving forward or going in circles?",
+    desc: "See whether recent commits focus on features, fixes, refactoring, tests, documentation, or maintenance.",
     gradient: `linear-gradient(135deg, #2e1a1a, #fbbf2422)`,
   },
 ];
