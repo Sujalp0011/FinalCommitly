@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { classifyCommitMessage } from "@/lib/commit-analysis";
 
 /**
  * Calculate a momentum score (0-100) for a repo based on:
@@ -48,18 +49,14 @@ function calculateMomentum(
   else frequencyScore = 10;
 
   // ── Feature Ratio Score (0-100) ──
-  // Commits starting with feat/add/feature = building new things
-  // Commits starting with fix/bug/hotfix = maintenance
+  // Shared prefix classification keeps this signal aligned with pattern insights.
   // Higher feature ratio contributes to stronger development momentum
-  const featurePattern = /^(feat|add|feature|implement|create|build|init)/i;
-  const fixPattern = /^(fix|bug|hotfix|patch|revert)/i;
-
   let featureCount = 0;
   let fixCount = 0;
   for (const commit of commits) {
-    const msg = commit.message.trim();
-    if (featurePattern.test(msg)) featureCount++;
-    else if (fixPattern.test(msg)) fixCount++;
+    const category = classifyCommitMessage(commit.message);
+    if (category === "feature") featureCount++;
+    else if (category === "fix") fixCount++;
   }
 
   let featureRatioScore: number;

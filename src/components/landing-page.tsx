@@ -254,7 +254,7 @@ const features = [
   {
     icon: Search,
     title: "Commit Pattern Insights",
-    desc: "Spot patterns in how you work. Are you building or just fixing? Moving forward or going in circles?",
+    desc: "See whether recent commits focus on features, fixes, refactoring, tests, documentation, or maintenance.",
     gradient: `linear-gradient(135deg, #2e1a1a, #fbbf2422)`,
   },
 ];
