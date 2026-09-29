@@ -1,22 +1,24 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import ActivityOverview from "@/components/activity-overview";
 import DailySummaryCard from "@/components/daily-summary-card";
 import ProjectsMomentum from "@/components/projects-momentum";
 import SyncButton from "@/components/sync-button";
 
 export default function DashboardClient() {
-  const [momentumRefreshKey, setMomentumRefreshKey] = useState(0);
+  const [dashboardDataRefreshKey, setDashboardDataRefreshKey] = useState(0);
 
-  const refreshProjectMomentum = useCallback(() => {
-    setMomentumRefreshKey((currentKey) => currentKey + 1);
+  const refreshDashboardData = useCallback(() => {
+    setDashboardDataRefreshKey((currentKey) => currentKey + 1);
   }, []);
 
   return (
     <>
-      <SyncButton onSyncComplete={refreshProjectMomentum} />
+      <SyncButton onSyncComplete={refreshDashboardData} />
+      <ActivityOverview refreshKey={dashboardDataRefreshKey} />
       <DailySummaryCard />
-      <ProjectsMomentum refreshKey={momentumRefreshKey} />
+      <ProjectsMomentum refreshKey={dashboardDataRefreshKey} />
     </>
   );
 }
