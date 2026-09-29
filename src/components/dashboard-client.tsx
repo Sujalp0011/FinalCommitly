@@ -5,6 +5,7 @@ import ActivityOverview from "@/components/activity-overview";
 import CommitPatternInsights from "@/components/commit-pattern-insights";
 import DailySummaryCard from "@/components/daily-summary-card";
 import ProjectsMomentum from "@/components/projects-momentum";
+import RecentActivity from "@/components/recent-activity";
 import SyncButton from "@/components/sync-button";
 
 export default function DashboardClient() {
@@ -20,6 +21,7 @@ export default function DashboardClient() {
       <ActivityOverview refreshKey={dashboardDataRefreshKey} />
       <CommitPatternInsights refreshKey={dashboardDataRefreshKey} />
       <DailySummaryCard />
+      <RecentActivity refreshKey={dashboardDataRefreshKey} />
       <ProjectsMomentum refreshKey={dashboardDataRefreshKey} />
     </>
   );
