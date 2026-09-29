@@ -57,6 +57,15 @@ export class GitHubRateLimitError extends Error {
   }
 }
 
+export class GitHubAuthError extends Error {
+  constructor(message?: string) {
+    super(
+      message ?? "GitHub token is invalid or expired. Please sign out and sign in again."
+    );
+    this.name = "GitHubAuthError";
+  }
+}
+
 async function githubFetch<T>(
   path: string,
   accessToken: string
@@ -70,8 +79,28 @@ async function githubFetch<T>(
     cache: "no-store",
   });
 
+  // Handle expired/revoked tokens
+  if (res.status === 401) {
+    throw new GitHubAuthError();
+  }
+
   // Handle rate limiting
   if (res.status === 403 || res.status === 429) {
+    // Check if it's actually a rate limit vs. a token scope issue
+    const remaining = res.headers.get("x-ratelimit-remaining");
+    if (remaining !== null && parseInt(remaining) === 0) {
+      const resetHeader = res.headers.get("x-ratelimit-reset");
+      const resetAt = resetHeader
+        ? new Date(parseInt(resetHeader) * 1000)
+        : new Date(Date.now() + 60 * 60 * 1000);
+      throw new GitHubRateLimitError(resetAt);
+    }
+    // 403 with remaining quota = token scope/permission issue
+    const body = await res.text();
+    if (body.includes("Bad credentials")) {
+      throw new GitHubAuthError();
+    }
+    // Fallback: treat as rate limit
     const resetHeader = res.headers.get("x-ratelimit-reset");
     const resetAt = resetHeader
       ? new Date(parseInt(resetHeader) * 1000)

@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import Image from "next/image";
 import SignOutButton from "@/components/sign-out-button";
 import SyncButton from "@/components/sync-button";
 import DailySummaryCard from "@/components/daily-summary-card";
@@ -18,7 +19,7 @@ export default async function DashboardPage() {
       {/* User info header */}
       <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
         {session.user?.image && (
-          <img
+          <Image
             src={session.user.image}
             alt={session.user.name ?? "User"}
             width={64}
