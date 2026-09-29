@@ -20,7 +20,7 @@ export async function GET() {
 
   const commits = await prisma.commit.findMany({
     where: {
-      repo: { userId: session.user.id },
+      repo: { userId: session.user.id, isTracked: true },
       committedAt: {
         gte: new Date(Date.now() - PERIOD_DAYS * MILLISECONDS_PER_DAY),
       },

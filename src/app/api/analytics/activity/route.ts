@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
 
   const commits = await prisma.commit.findMany({
     where: {
-      repo: { userId: session.user.id },
+      repo: { userId: session.user.id, isTracked: true },
       committedAt: {
         gte: queryStart,
         lte: now,

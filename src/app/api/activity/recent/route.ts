@@ -17,6 +17,7 @@ export async function GET() {
     where: {
       repo: {
         userId: session.user.id,
+        isTracked: true,
       },
     },
     select: {

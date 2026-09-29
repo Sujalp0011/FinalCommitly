@@ -50,6 +50,7 @@ export async function POST() {
 
     let totalReposSynced = 0;
     let totalCommitsSaved = 0;
+    let skippedRepoCount = 0;
     const errors: string[] = [];
 
     // 2. Process each repo
@@ -76,6 +77,11 @@ export async function POST() {
             userId,
           },
         });
+
+        if (!repo.isTracked) {
+          skippedRepoCount++;
+          continue;
+        }
 
         // 3. Fetch last 30 days of commits
         let commits;
@@ -191,6 +197,7 @@ export async function POST() {
               partial: true,
               reposSynced: totalReposSynced,
               commitsSaved: totalCommitsSaved,
+              skippedRepoCount,
             },
             { status: 429 }
           );
@@ -209,6 +216,7 @@ export async function POST() {
       success: true,
       reposSynced: totalReposSynced,
       commitsSaved: totalCommitsSaved,
+      skippedRepoCount,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (err) {

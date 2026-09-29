@@ -12,20 +12,22 @@ export async function GET() {
 
   const userId = session.user.id;
 
-  const [repoCount, commitCount, lastSync] = await Promise.all([
+  const [storedRepoCount, trackedRepoCount, commitCount, lastSync] = await Promise.all([
     prisma.repo.count({ where: { userId } }),
+    prisma.repo.count({ where: { userId, isTracked: true } }),
     prisma.commit.count({
-      where: { repo: { userId } },
+      where: { repo: { userId, isTracked: true } },
     }),
     prisma.repo.findFirst({
-      where: { userId, lastSyncedAt: { not: null } },
+      where: { userId, isTracked: true, lastSyncedAt: { not: null } },
       orderBy: { lastSyncedAt: "desc" },
       select: { lastSyncedAt: true },
     }),
   ]);
 
   return NextResponse.json({
-    repos: repoCount,
+    repos: storedRepoCount,
+    trackedRepos: trackedRepoCount,
     commits: commitCount,
     lastSyncedAt: lastSync?.lastSyncedAt ?? null,
   });

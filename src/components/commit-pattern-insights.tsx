@@ -111,7 +111,7 @@ export default function CommitPatternInsights({
       <div style={{ border: "1px solid #30363D", borderRadius: "10px", background: "#0D1117", padding: "16px" }}>
         {patterns.totalCommits === 0 ? (
           <p style={{ margin: 0, fontSize: "0.85rem", lineHeight: 1.6, color: "#8B949E" }}>
-            No commits found in the last 30 days. Sync your repositories to analyze recent commit patterns.
+            No tracked projects have recent activity to analyze.
           </p>
         ) : (
           <>

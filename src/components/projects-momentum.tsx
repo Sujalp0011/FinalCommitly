@@ -120,7 +120,7 @@ export default function ProjectsMomentum({ refreshKey }: ProjectsMomentumProps) 
             color: "#666",
           }}
         >
-          <p style={{ margin: 0 }}>No repos synced yet. Hit <strong style={{ color: "#888" }}>Sync Now</strong> above to get started.</p>
+          <p style={{ margin: 0 }}>No tracked projects have recent activity. Manage tracked projects above or sync to discover repositories.</p>
         </div>
       </div>
     );

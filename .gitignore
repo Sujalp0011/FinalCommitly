@@ -36,7 +36,6 @@ next-env.d.ts
 
 # Prisma
 prisma/*.db
-prisma/migrations/
 
 # IDE
 .idea/

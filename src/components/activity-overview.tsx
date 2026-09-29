@@ -178,7 +178,7 @@ export default function ActivityOverview({ refreshKey }: ActivityOverviewProps) 
 
           {activity.totalCommits === 0 ? (
             <p style={{ margin: "14px 0 0", fontSize: "0.8rem", color: "#8B949E" }}>
-              No commits found in the last 30 days. Sync your repositories to load recent activity.
+              No tracked projects have recent activity.
             </p>
           ) : null}
         </div>

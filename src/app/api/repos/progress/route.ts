@@ -13,9 +13,9 @@ export async function GET() {
 
   const userId = session.user.id;
 
-  // Fetch all repos with their commits from the last 30 days
+  // Fetch tracked repos with their commits from the last 30 days.
   const repos = await prisma.repo.findMany({
-    where: { userId },
+    where: { userId, isTracked: true },
     include: {
       commits: {
         where: {

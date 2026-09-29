@@ -16,12 +16,12 @@ export async function POST() {
 
     const userId = session.user.id;
 
-    // Query commits from the last 24 hours across all user repos
+    // Query commits from the last 24 hours across tracked user repos.
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const recentCommits = await prisma.commit.findMany({
       where: {
-        repo: { userId },
+        repo: { userId, isTracked: true },
         committedAt: { gte: since },
       },
       include: {
@@ -35,7 +35,7 @@ export async function POST() {
     if (recentCommits.length === 0) {
       return NextResponse.json({
         summary: null,
-        message: "No commits in the last 24 hours",
+        message: "No tracked projects have commits in the last 24 hours",
       });
     }
 

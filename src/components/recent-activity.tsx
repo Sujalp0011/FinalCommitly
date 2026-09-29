@@ -168,7 +168,7 @@ export default function RecentActivity({ refreshKey }: RecentActivityProps) {
             </h2>
           </div>
           <p style={{ margin: "5px 0 0 27px", color: "#6E7681", fontSize: "0.78rem" }}>
-            Latest commits across your synced projects.
+            Latest commits across your tracked projects.
           </p>
         </div>
         <span style={{ color: "#6E7681", fontSize: "0.75rem", whiteSpace: "nowrap" }}>
@@ -178,7 +178,7 @@ export default function RecentActivity({ refreshKey }: RecentActivityProps) {
 
       {commits.length === 0 ? (
         <div style={{ padding: "24px", border: "1px solid #21262D", borderRadius: "10px", color: "#8B949E", textAlign: "center", fontSize: "0.85rem" }}>
-          No stored commits yet. Sync your repositories to build a recent activity feed.
+          No tracked projects have recent activity.
         </div>
       ) : (
         <>
